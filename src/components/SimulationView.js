@@ -1,14 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { noise } from '@chriscourses/perlin-noise';
 
 const CELL_SIZE = 5;
-const ALIVE_COLOR = [255, 255, 255]; // White color
-const DEAD_COLOR = [0, 0, 0]; // Black color
+
+const COLORS = [
+    [135, 206, 250, 250], // Bright sky blue, topmost layer
+    [100, 180, 255, 150], // Vivid cerulean blue, surface layer
+    [70, 130, 180, 100],  // Rich steel blue, mid-depth layer
+    [30, 60, 130, 50]    // Deep indigo blue, deepest layer
+  ];
+  const DEAD_COLOR = [15, 20, 40, 255]; // Deep, intense blue for "empty" water
+  const DEPTH_COLOR = [10, 30, 60, 255]; // Darker blue with a bit more visibility for depth layers
+  const LILY_PAD_COLOR = [80, 180, 80, 200]; // Lush green for lily pads
+  const FLOWER_COLOR = [255, 182, 193, 220]; // Bright pastel pink for flowers
+  const VINE_COLOR = [34, 139, 34, 180]; // Vibrant forest green for vines
+  
+
+const INITIAL_LIVE_PROBABILITY = 0.05;
+const NOISE_SCALE = 0.05;
+const LILY_PAD_THRESHOLD = 0.7;
+const LILY_PAD_SIZE = 3; // Size of lily pad in cells (3x3 pixels)
+const VINE_THRESHOLD = 0.8;
+const FLOWER_THRESHOLD = 0.9;
+const FLOWER_SIZE = 7; // Increased size of flower (7x7 pixels)
 
 const SimulationView = () => {
   const canvasRef = useRef(null);
-  const [grid, setGrid] = useState([]);
+  const [grids, setGrids] = useState([]);
   const [cols, setCols] = useState(0);
   const [rows, setRows] = useState(0);
+  const [plantLayer, setPlantLayer] = useState([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,47 +45,81 @@ const SimulationView = () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Initialize the grid
-    setGrid(Array(cols).fill().map(() => Array(rows).fill().map(() => Math.random() > 0.5)));
+    // Initialize the grids with lower density, including solid color layers
+    setGrids(Array(COLORS.length * 2 - 1).fill().map((_, index) => 
+      index % 2 === 0
+        ? Array(cols).fill().map(() => Array(rows).fill().map(() => Math.random() < INITIAL_LIVE_PROBABILITY))
+        : Array(cols).fill().map(() => Array(rows).fill(true))
+    ));
 
-    const updateGrid = () => {
-      setGrid(prevGrid => {
-        if (prevGrid.length === 0 || prevGrid[0].length === 0) {
-          return prevGrid;
-        }
-
-        const next = prevGrid.map(arr => [...arr]);
-
-        for (let i = 0; i < cols; i++) {
-          for (let j = 0; j < rows; j++) {
-            const state = prevGrid[i][j];
-            let neighbors = 0;
-
-            // Count neighbors (including wrapping)
-            for (let x = -1; x <= 1; x++) {
-              for (let y = -1; y <= 1; y++) {
-                if (x === 0 && y === 0) continue;
-                const col = (i + x + cols) % cols;
-                const row = (j + y + rows) % rows;
-                neighbors += prevGrid[col][row] ? 1 : 0;
-              }
-            }
-
-            // Apply Conway's Game of Life rules
-            if (state && (neighbors < 2 || neighbors > 3)) {
-              next[i][j] = false;
-            } else if (!state && neighbors === 3) {
-              next[i][j] = true;
+    // Initialize plant layer (lily pads, vines, and flowers)
+    const newPlantLayer = Array(cols).fill().map(() => Array(rows).fill(0));
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        const noiseValue = noise(i * NOISE_SCALE, j * NOISE_SCALE);
+        if (noiseValue > LILY_PAD_THRESHOLD) {
+          // Create lily pad
+          for (let x = -1; x <= 1; x++) {
+            for (let y = -1; y <= 1; y++) {
+              const newI = (i + x + cols) % cols;
+              const newJ = (j + y + rows) % rows;
+              newPlantLayer[newI][newJ] = 1; // 1 represents lily pad
             }
           }
+          // Add flower to the center of the lily pad
+          if (Math.random() > 0.5) {
+            newPlantLayer[i][j] = 4; // 4 represents flower on lily pad
+          }
+        } else if (noiseValue > VINE_THRESHOLD) {
+          newPlantLayer[i][j] = 2; // 2 represents vine
+          if (noiseValue > FLOWER_THRESHOLD) {
+            newPlantLayer[i][j] = 3; // 3 represents flower
+          }
         }
+      }
+    }
+    setPlantLayer(newPlantLayer);
 
-        return next;
-      });
+    const updateGrids = () => {
+      setGrids(prevGrids => prevGrids.map((grid, index) => index % 2 === 0 ? updateSingleGrid(grid) : grid));
     };
 
-    const renderGrid = () => {
-      if (grid.length === 0 || grid[0].length === 0) {
+    const updateSingleGrid = (prevGrid) => {
+      if (prevGrid.length === 0 || prevGrid[0].length === 0) {
+        return prevGrid;
+      }
+
+      const next = prevGrid.map(arr => [...arr]);
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const state = prevGrid[i][j];
+          let neighbors = 0;
+
+          // Count neighbors (including wrapping)
+          for (let x = -1; x <= 1; x++) {
+            for (let y = -1; y <= 1; y++) {
+              if (x === 0 && y === 0) continue;
+              const col = (i + x + cols) % cols;
+              const row = (j + y + rows) % rows;
+              neighbors += prevGrid[col][row] ? 1 : 0;
+            }
+          }
+
+          // Apply Conway's Game of Life rules
+          if (state && (neighbors < 2 || neighbors > 3)) {
+            next[i][j] = false;
+          } else if (!state && neighbors === 3) {
+            next[i][j] = true;
+          }
+        }
+      }
+
+      return next;
+    };
+
+    const renderGrids = () => {
+      if (grids.length === 0 || grids[0].length === 0) {
         return;
       }
 
@@ -73,15 +128,64 @@ const SimulationView = () => {
 
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
-          const color = grid[i][j] ? ALIVE_COLOR : DEAD_COLOR;
+          let finalColor = DEAD_COLOR;
+          let alpha = 255;
+
+          if (plantLayer[i][j] === 1) {
+            finalColor = LILY_PAD_COLOR.slice(0, 3);
+            alpha = LILY_PAD_COLOR[3];
+          } else if (plantLayer[i][j] === 2) {
+            finalColor = VINE_COLOR.slice(0, 3);
+            alpha = VINE_COLOR[3];
+          } else if (plantLayer[i][j] === 3) {
+            finalColor = FLOWER_COLOR.slice(0, 3);
+            alpha = FLOWER_COLOR[3];
+          } else if (plantLayer[i][j] === 4) {
+            // Render lily pad with flower
+            finalColor = LILY_PAD_COLOR.slice(0, 3);
+            alpha = LILY_PAD_COLOR[3];
+            
+            // Draw larger flower
+            const flowerPixels = [
+              [-3, 0], [-2, -1], [-2, 0], [-2, 1], [-1, -2], [-1, -1], [-1, 0], [-1, 1], [-1, 2],
+              [0, -3], [0, -2], [0, -1], [0, 0], [0, 1], [0, 2], [0, 3],
+              [1, -2], [1, -1], [1, 0], [1, 1], [1, 2],
+              [2, -1], [2, 0], [2, 1], [3, 0]
+            ];
+            for (const [dx, dy] of flowerPixels) {
+              const pixelIndex = ((j * CELL_SIZE + dy) * canvas.width + (i * CELL_SIZE + dx)) * 4;
+              data[pixelIndex] = FLOWER_COLOR[0];
+              data[pixelIndex + 1] = FLOWER_COLOR[1];
+              data[pixelIndex + 2] = FLOWER_COLOR[2];
+              data[pixelIndex + 3] = FLOWER_COLOR[3];
+            }
+          } else {
+            for (let layer = 0; layer < grids.length; layer++) {
+              if (layer % 2 === 0 && grids[layer][i][j]) {
+                const baseColor = COLORS[Math.floor(layer / 2)];
+                finalColor = baseColor.slice(0, 3);
+                alpha = baseColor[3];
+                break;
+              } else if (layer % 2 !== 0) {
+                // Apply depth effect
+                finalColor = finalColor.map((c, index) => 
+                  Math.max(0, c - DEPTH_COLOR[index])
+                );
+                alpha = Math.max(0, alpha - (255 - DEPTH_COLOR[3]));
+              }
+            }
+          }
+
           const index = (j * CELL_SIZE * canvas.width + i * CELL_SIZE) * 4;
           for (let x = 0; x < CELL_SIZE; x++) {
             for (let y = 0; y < CELL_SIZE; y++) {
               const pixelIndex = index + (y * canvas.width + x) * 4;
-              data[pixelIndex] = color[0];
-              data[pixelIndex + 1] = color[1];
-              data[pixelIndex + 2] = color[2];
-              data[pixelIndex + 3] = 255;
+              if (plantLayer[i][j] !== 4 || (Math.abs(x - 3) > 3 || Math.abs(y - 3) > 3)) {
+                data[pixelIndex] = finalColor[0];
+                data[pixelIndex + 1] = finalColor[1];
+                data[pixelIndex + 2] = finalColor[2];
+                data[pixelIndex + 3] = alpha;
+              }
             }
           }
         }
@@ -91,8 +195,8 @@ const SimulationView = () => {
     };
 
     const simulate = () => {
-      updateGrid();
-      renderGrid();
+      updateGrids();
+      renderGrids();
       const simulationId = requestAnimationFrame(simulate);
       return simulationId;
     };
@@ -105,27 +209,74 @@ const SimulationView = () => {
     };
   }, [cols, rows]);
 
-  // Add a separate useEffect for grid updates
+  // Update the separate useEffect for grid updates
   useEffect(() => {
-    if (grid.length > 0 && grid[0].length > 0) {
+    if (grids.length > 0 && grids[0].length > 0 && plantLayer.length > 0) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
 
-      const renderGrid = () => {
+      const renderGrids = () => {
         const imageData = ctx.createImageData(canvas.width, canvas.height);
         const data = imageData.data;
 
         for (let i = 0; i < cols; i++) {
           for (let j = 0; j < rows; j++) {
-            const color = grid[i][j] ? ALIVE_COLOR : DEAD_COLOR;
+            let finalColor = DEAD_COLOR;
+            let alpha = 255;
+
+            if (plantLayer[i][j] === 1) {
+              finalColor = LILY_PAD_COLOR.slice(0, 3);
+              alpha = LILY_PAD_COLOR[3];
+            } else if (plantLayer[i][j] === 2) {
+              finalColor = VINE_COLOR.slice(0, 3);
+              alpha = VINE_COLOR[3];
+            } else if (plantLayer[i][j] === 3) {
+              finalColor = FLOWER_COLOR.slice(0, 3);
+              alpha = FLOWER_COLOR[3];
+            } else if (plantLayer[i][j] === 4) {
+              finalColor = LILY_PAD_COLOR.slice(0, 3);
+              alpha = LILY_PAD_COLOR[3];
+              
+              // Draw larger flower
+              const flowerPixels = [
+                [-3, 0], [-2, -1], [-2, 0], [-2, 1], [-1, -2], [-1, -1], [-1, 0], [-1, 1], [-1, 2],
+                [0, -3], [0, -2], [0, -1], [0, 0], [0, 1], [0, 2], [0, 3],
+                [1, -2], [1, -1], [1, 0], [1, 1], [1, 2],
+                [2, -1], [2, 0], [2, 1], [3, 0]
+              ];
+              for (const [dx, dy] of flowerPixels) {
+                const pixelIndex = ((j * CELL_SIZE + dy) * canvas.width + (i * CELL_SIZE + dx)) * 4;
+                data[pixelIndex] = FLOWER_COLOR[0];
+                data[pixelIndex + 1] = FLOWER_COLOR[1];
+                data[pixelIndex + 2] = FLOWER_COLOR[2];
+                data[pixelIndex + 3] = FLOWER_COLOR[3];
+              }
+            } else {
+              let isDepthLayer = false;
+
+              for (let layer = 0; layer < grids.length; layer++) {
+                if (layer % 2 === 0 && grids[layer][i][j]) {
+                  finalColor = COLORS[Math.floor(layer / 2)];
+                  break;
+                } else if (layer % 2 !== 0) {
+                  isDepthLayer = true;
+                  finalColor = DEPTH_COLOR;
+                }
+              }
+
+              alpha = isDepthLayer ? DEPTH_COLOR[3] : 255;
+            }
+
             const index = (j * CELL_SIZE * canvas.width + i * CELL_SIZE) * 4;
             for (let x = 0; x < CELL_SIZE; x++) {
               for (let y = 0; y < CELL_SIZE; y++) {
                 const pixelIndex = index + (y * canvas.width + x) * 4;
-                data[pixelIndex] = color[0];
-                data[pixelIndex + 1] = color[1];
-                data[pixelIndex + 2] = color[2];
-                data[pixelIndex + 3] = 255;
+                if (plantLayer[i][j] !== 4 || (Math.abs(x - 3) > 3 || Math.abs(y - 3) > 3)) {
+                  data[pixelIndex] = finalColor[0];
+                  data[pixelIndex + 1] = finalColor[1];
+                  data[pixelIndex + 2] = finalColor[2];
+                  data[pixelIndex + 3] = alpha;
+                }
               }
             }
           }
@@ -134,9 +285,9 @@ const SimulationView = () => {
         ctx.putImageData(imageData, 0, 0);
       };
 
-      renderGrid();
+      renderGrids();
     }
-  }, [grid, cols, rows]);
+  }, [grids, plantLayer, cols, rows]);
 
   return (
     <canvas
@@ -148,7 +299,7 @@ const SimulationView = () => {
         width: '100%',
         height: '100%',
         zIndex: -1,
-        backgroundColor: 'black'
+        backgroundColor: 'rgb(0, 0, 50)' // Dark blue background
       }}
     />
   );
