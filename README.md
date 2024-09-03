@@ -1,6 +1,6 @@
-# Lucid Valley
+# Lucid Lake
 
-Welcome to Lucid Valley, the personal landing page of 'lucid'.
+Welcome to Lucid Lake, the personal landing page of 'lucid'.
 
 ## About
 
@@ -28,4 +28,4 @@ To learn more about the technologies used in this project, check out the followi
 - [React Documentation](https://reactjs.org/)
 - [Create React App Documentation](https://facebook.github.io/create-react-app/docs/getting-started)
 
-Enjoy exploring Lucid Valley!
+Enjoy exploring Lucid Lake!

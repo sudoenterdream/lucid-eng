@@ -9,85 +9,90 @@ function HomePage() {
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
       alignItems: 'center',
       padding: '20px',
       boxSizing: 'border-box',
     },
-    title: {
-      color: '#ffffff',
-      fontSize: 'clamp(1.5em, 5vw, 2.5em)',
-      fontWeight: 'bold',
-      fontFamily: 'monospace',
-      backgroundColor: 'rgb(0, 0, 0)',
-      padding: '10px 20px',
-      borderRadius: '5px',
-      marginBottom: '20px',
-      textAlign: 'center',
-    },
-    introContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '90%',
-      maxWidth: '800px',
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      borderRadius: '10px',
-      padding: '20px',
-      boxShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
-    },
-    photo: {
-      width: '150px',
-      height: '150px',
-      borderRadius: '50%',
-      marginBottom: '20px',
-    },
-    welcomeNote: {
-      color: '#ffffff',
-      fontFamily: 'monospace',
-      fontSize: 'clamp(0.9em, 3vw, 1.2em)',
-      lineHeight: '1.5',
-      textAlign: 'center',
-    },
     nav: {
       display: 'flex',
-      flexWrap: 'wrap',
       justifyContent: 'center',
+      alignItems: 'flex-end',
       width: '100%',
-      marginTop: '20px',
+      marginTop: 'auto',
+      padding: '10px 0',
     },
     link: {
       color: '#000000',
       textDecoration: 'none',
-      margin: '10px',
-      fontSize: 'clamp(0.8em, 3vw, 1.2em)',
+      margin: '0 10px',
+      fontSize: 'clamp(0.7em, 2vw, 1em)',
       fontFamily: 'monospace',
       backgroundColor: '#ffffff',
-      padding: '10px 20px',
-      borderRadius: '5px',
-      boxShadow: '5px 5px 0px #888888',
-      border: '2px solid #000000',
-      imageRendering: 'pixelated',
+      padding: '5px 10px',
+      borderRadius: '3px',
+    },
+    header: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'flex-start',
+      width: '100%',
+      marginBottom: '20px',
+      position: 'relative',
+    },
+    avatar: {
+      width: '80px',
+      height: '80px',
+      borderRadius: '50%',
+      border: '3px solid #ffffff',
+      boxShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
+    },
+    dialogueBubble: {
+      position: 'relative',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderRadius: '10px',
+      padding: '10px',
+      maxWidth: '300px',
+      textAlign: 'left',
+      fontFamily: 'monospace',
+      fontSize: 'clamp(0.8em, 2vw, 1em)',
+      marginLeft: '20px',
+      fontWeight: 'bold',
+    },
+    dialogueArrow: {
+      content: '""',
+      position: 'absolute',
+      top: '20px',
+      left: '-10px',
+      borderTop: '10px solid transparent',
+      borderBottom: '10px solid transparent',
+      borderRight: '10px solid rgba(255, 255, 255, 0.9)',
     },
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Welcome to Lucid Lake</h1>
-      
-      <div style={styles.introContainer}>
-        <img src="/images/coffee.png" alt="Lucid" style={styles.photo} />
-        <div style={styles.welcomeNote}>
-          <p>Hi, I'm lucid.</p>
-          <p>I am an AI speedrunner, math worshipper, anime anon. Pardon me you are looking at a half baked personal page. check back later.</p>
+      <header style={styles.header}>
+        <img src="/images/lucid.jpg" alt="Lucid" style={styles.avatar} />
+        <div style={styles.dialogueBubble}>
+          <div style={styles.dialogueArrow}></div>
+          <p>Hi, Pardon me you are looking at a half baked personal page. check back later.</p>
         </div>
-      </div>
+      </header>
 
-      <nav style={styles.nav}>
-        <a href="#about" style={styles.link}>About</a>
-        <a href="#projects" style={styles.link}>Projects</a>
-        <a href="#writings" style={styles.link}>Writings</a>
+      <nav style={{
+        ...styles.nav,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        '@media (max-width: 768px)': {
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+        }
+      }}>
+        <a href="#about" style={{...styles.link, '@media (max-width: 768px)': {margin: '5px 0'}}}>About</a>
+        <a href="#projects" style={{...styles.link, '@media (max-width: 768px)': {margin: '5px 0'}}}>Projects</a>
+        <a href="#writings" style={{...styles.link, '@media (max-width: 768px)': {margin: '5px 0'}}}>Writings</a>
       </nav>
     </div>
   );

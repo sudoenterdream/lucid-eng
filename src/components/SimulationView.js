@@ -4,19 +4,19 @@ import { noise } from '@chriscourses/perlin-noise';
 const CELL_SIZE = 5;
 
 const COLORS = [
-    [135, 206, 250, 250], // Bright sky blue, topmost layer
-    [100, 180, 255, 150], // Vivid cerulean blue, surface layer
-    [70, 130, 180, 100],  // Rich steel blue, mid-depth layer
-    [30, 60, 130, 50]    // Deep indigo blue, deepest layer
+    [142, 220, 230], // Bright sky blue, topmost layer
+    [113, 182, 200], // Vivid cerulean blue, surface layer
+    [84, 144, 190],  // Rich steel blue, mid-depth layer
+    [55, 105, 180]    // Deep indigo blue, deepest layer
   ];
-  const DEAD_COLOR = [15, 20, 40, 255]; // Deep, intense blue for "empty" water
+  const DEAD_COLOR = [29, 52, 97, 255]; // Deep, intense blue for "empty" water
   const DEPTH_COLOR = [10, 30, 60, 255]; // Darker blue with a bit more visibility for depth layers
-  const LILY_PAD_COLOR = [80, 180, 80, 200]; // Lush green for lily pads
-  const FLOWER_COLOR = [255, 182, 193, 220]; // Bright pastel pink for flowers
+  const LILY_PAD_COLOR = [60, 180, 80, 200]; // Lush green for lily pads
+  const FLOWER_COLOR = [183, 195, 243, 220]; // Bright pastel pink for flowers
   const VINE_COLOR = [34, 139, 34, 180]; // Vibrant forest green for vines
   
 
-const INITIAL_LIVE_PROBABILITY = 0.05;
+const INITIAL_LIVE_PROBABILITY = 0.08;
 const NOISE_SCALE = 0.05;
 const LILY_PAD_THRESHOLD = 0.7;
 const LILY_PAD_SIZE = 3; // Size of lily pad in cells (3x3 pixels)
