@@ -4,10 +4,10 @@ import { noise } from '@chriscourses/perlin-noise';
 const CELL_SIZE = 5;
 
 const COLORS = [
-    [142, 220, 230], // Bright sky blue, topmost layer
-    [113, 182, 200], // Vivid cerulean blue, surface layer
-    [84, 144, 190],  // Rich steel blue, mid-depth layer
-    [55, 105, 180]    // Deep indigo blue, deepest layer
+  [250, 195, 243], // Bright sky blue, topmost layer
+    [104,164,184], // Vivid cerulean blue, surface layer
+    [66,107,138],  // Rich steel blue, mid-depth layer
+    [28, 53, 92]    // Deep indigo blue, deepest layer
   ];
   const DEAD_COLOR = [29, 52, 97, 255]; // Deep, intense blue for "empty" water
   const DEPTH_COLOR = [10, 30, 60, 255]; // Darker blue with a bit more visibility for depth layers
@@ -16,7 +16,7 @@ const COLORS = [
   const VINE_COLOR = [34, 139, 34, 180]; // Vibrant forest green for vines
   
 
-const INITIAL_LIVE_PROBABILITY = 0.08;
+const INITIAL_LIVE_PROBABILITIES = [0.03, 0.05, 0.08, 0.10];
 const NOISE_SCALE = 0.05;
 const LILY_PAD_THRESHOLD = 0.7;
 const LILY_PAD_SIZE = 3; // Size of lily pad in cells (3x3 pixels)
@@ -45,10 +45,10 @@ const SimulationView = () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Initialize the grids with lower density, including solid color layers
+    // Initialize the grids with varying densities, including solid color layers
     setGrids(Array(COLORS.length * 2 - 1).fill().map((_, index) => 
       index % 2 === 0
-        ? Array(cols).fill().map(() => Array(rows).fill().map(() => Math.random() < INITIAL_LIVE_PROBABILITY))
+        ? Array(cols).fill().map(() => Array(rows).fill().map(() => Math.random() < INITIAL_LIVE_PROBABILITIES[Math.floor(index / 2)]))
         : Array(cols).fill().map(() => Array(rows).fill(true))
     ));
 

@@ -9,28 +9,10 @@ function HomePage() {
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-start',
       alignItems: 'center',
       padding: '20px',
       boxSizing: 'border-box',
-    },
-    nav: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'flex-end',
-      width: '100%',
-      marginTop: 'auto',
-      padding: '10px 0',
-    },
-    link: {
-      color: '#000000',
-      textDecoration: 'none',
-      margin: '0 10px',
-      fontSize: 'clamp(0.7em, 2vw, 1em)',
-      fontFamily: 'monospace',
-      backgroundColor: '#ffffff',
-      padding: '5px 10px',
-      borderRadius: '3px',
     },
     header: {
       display: 'flex',
@@ -79,21 +61,6 @@ function HomePage() {
           <p>Hi, Pardon me you are looking at a half baked personal page. check back later.</p>
         </div>
       </header>
-
-      <nav style={{
-        ...styles.nav,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'flex-end',
-        '@media (max-width: 768px)': {
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-        }
-      }}>
-        <a href="#about" style={{...styles.link, '@media (max-width: 768px)': {margin: '5px 0'}}}>About</a>
-        <a href="#projects" style={{...styles.link, '@media (max-width: 768px)': {margin: '5px 0'}}}>Projects</a>
-        <a href="#writings" style={{...styles.link, '@media (max-width: 768px)': {margin: '5px 0'}}}>Writings</a>
-      </nav>
     </div>
   );
 }
