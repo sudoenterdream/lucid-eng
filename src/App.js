@@ -1,40 +1,26 @@
-import React, { useEffect } from 'react';
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import HomePage from './pages/HomePage';
-import SimulationView from './components/SimulationView';
+import Background from './components/Background';
+import Letter from './components/Letter';
+import Projects from './components/Projects';
+import Notes from './components/Notes';
+import Research from './components/Research';
 
 function App() {
-  useEffect(() => {
-    const handleResize = () => {
-      window.location.reload();
-    };
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
-    };
-  }, []);
-
   return (
-    <div className="App">
-      <SimulationView />
-      <div 
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0, 0, 0, 0.2)',
-          zIndex: 0,
-          pointerEvents: 'none'
-        }}
-      />
-      <HomePage />
-    </div>
+    <Router>
+      <div className="App">
+        <Background />
+        <Routes>
+          <Route path="/" element={<Letter />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/notes" element={<Notes />} />
+          <Route path="/research" element={<Research />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
